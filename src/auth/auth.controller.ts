@@ -19,6 +19,9 @@ export class AuthController {
   @Post('signup')
   signup() {
     // Later: return this.authService.signup();
+    // NestJS automatically converts whatever you return (string, object, array, etc.)
+    // into a proper HTTP response, so you don't need to specify the return type manually.
+    return this.authService.signup();
   }
 
   // This route will handle POST requests to /auth/signin
@@ -26,5 +29,8 @@ export class AuthController {
   @Post('signin')
   signin() {
     // Later: return this.authService.login();
+    // Again, no need to mention the type of returned data.
+    // NestJS handles serialization and sends the response back in JSON by default.
+    return this.authService.signin();
   }
 }

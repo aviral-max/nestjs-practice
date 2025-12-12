@@ -7,9 +7,13 @@ import { Injectable } from '@nestjs/common';
 export class AuthService {
   // Function for handling login logic.
   // Later you will add code to validate the user, check password, etc.
-  login() {}
+  signin() {
+    return { message: 'i am signin route!' };
+  }
 
   // Function for handling signup logic.
   // Later you will add code to create the user, hash password, etc.
-  signup() {}
+  signup() {
+    return 'i am signup route!';
+  }
 }
