@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { User, Bookmark } from '@prisma/client';
 
 // Service = contains all the business logic.
 // This is the place where actual work happens (like saving a user,
