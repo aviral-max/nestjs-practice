@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import type { AuthDto } from './dto';
+import { AuthDto } from './dto';
 
 // Controller = receives incoming HTTP requests (like /login, /signup)
 // and sends back responses.
