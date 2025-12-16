@@ -15,7 +15,21 @@ async function bootstrap() {
    *
    * If validation fails, the controller is never called.
    */
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      // whitelist: true
+      // ----------------
+      // Automatically removes any extra properties from the request body
+      // that are NOT defined and decorated in the DTO.
+      //
+      // Example:
+      // DTO allows: { email, password }
+      // Incoming request: { email, password, role }
+      // Result after validation: { email, password }
+      // → "role" is silently stripped for security & data consistency.
+      whitelist: true,
+    }),
+  );
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

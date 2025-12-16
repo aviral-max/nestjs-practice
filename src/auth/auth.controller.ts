@@ -54,10 +54,7 @@ export class AuthController {
     // Later: return this.authService.signup();
     // NestJS automatically converts whatever you return (string, object, array, etc.)
     // into a proper HTTP response, so you don't need to specify the return type manually.
-    console.log({
-      dto,
-    }); // Just to show how to access request data.
-    return this.authService.signup();
+    return this.authService.signup(dto);
   }
 
   // This route will handle POST requests to /auth/signin
