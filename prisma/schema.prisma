@@ -22,6 +22,9 @@ model User {
 
   firstName String? 
   lastName String? 
+
+  bookmarks Bookmark[]
+  @@map("users")
 }
 
 model Bookmark {
@@ -32,4 +35,29 @@ model Bookmark {
   title String
   description String?
   link String
+
+  // Relation: One User → Many Bookmarks (many-to-one)
+  //
+  // - A User can have multiple Bookmarks
+  // - Each Bookmark belongs to exactly one User
+  //
+  // How it works:
+  // - `userId` is the foreign key stored in the Bookmark table
+  // - `fields: [userId]` → the column in this model that holds the FK
+  // - `references: [id]` → the column in the User model it points to
+  //
+  // Prisma uses this to link bookmarks to their owner
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+
+  // @@map("users") / @@map("bookmarks")
+  //
+  // - Maps the Prisma model name to the actual PostgreSQL table name
+  // - `User` model → uses the `users` table in DB
+  // - `Bookmark` model → uses the `bookmarks` table in DB
+  //
+  // Prisma Studio shows model names (User, Bookmark),
+  // while PostgreSQL contains the real tables (users, bookmarks).
+  // @@map only bridges this naming difference — it does NOT affect relations.
+  @@map("bookmarks")
 }

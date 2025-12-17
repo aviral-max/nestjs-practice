@@ -27,6 +27,35 @@ export class AuthService {
     const hash = await argon.hash(dto.password);
 
     // save the new user in the db
+    /**
+     * Transformers (usually used with class-transformer) help control
+     * how data is returned to the client.
+     *
+     * Instead of manually selecting fields in every query (like excluding
+     * hashed passwords using Prisma `select`), transformers allow us to:
+     * - Hide sensitive fields (e.g., password, tokens)
+     * - Format or rename response properties
+     * - Control what is exposed in API responses
+     *
+     * They work at the response level, meaning the database can still
+     * return full data, but only safe fields are sent to the client.
+     *
+     * This keeps privacy concerns centralized and makes the code cleaner
+     * and more maintainable.
+     * Example:
+     *
+     * class UserResponseDto {
+     *   id: number;
+     *   email: string;
+     *
+     *   @Exclude()
+     *   password: string;
+     * }
+     *
+     * Only `id` and `email` will be returned to the client,
+     * even if `password` exists in the database.
+     */
+
     const user = await this.prisma.user.create({
       data: {
         email: dto.email,
