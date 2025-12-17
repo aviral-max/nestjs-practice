@@ -60,10 +60,10 @@ export class AuthController {
   // This route will handle POST requests to /auth/signin
   // Here we will call authService.login() or authService.signin().
   @Post('signin')
-  signin() {
+  signin(@Body() dto: AuthDto) {
     // Later: return this.authService.login();
     // Again, no need to mention the type of returned data.
     // NestJS handles serialization and sends the response back in JSON by default.
-    return this.authService.signin();
+    return this.authService.signin(dto);
   }
 }

@@ -13,8 +13,29 @@ export class AuthService {
   constructor(private prisma: PrismaService) {}
   // Function for handling login logic.
   // Later you will add code to validate the user, check password, etc.
-  signin() {
-    return { message: 'i am signin route!' };
+  async signin(dto: AuthDto) {
+    //find the user by email
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: dto.email,
+      },
+    });
+
+    //if user does not exist throw exception
+    if (!user) {
+      throw new ForbiddenException('Credentials incorrect');
+    }
+    //compare password
+    const isPasswordValid = await argon.verify(user.hash, dto.password);
+    //if password incorrect throw exception
+    if (!isPasswordValid) {
+      throw new ForbiddenException('Credentials incorrect');
+    }
+
+    // send back the user
+    //excluding the hash
+    const { hash, ...safeUser } = user;
+    return safeUser;
   }
 
   // Function for handling signup logic.
@@ -66,7 +87,21 @@ export class AuthService {
       });
 
       //return the saved user
-      return user;
+      // Destructuring with aliasing to exclude `hash` safely from the response.
+      //
+      // Why aliasing is needed:
+      // - `hash` was already declared earlier (password hash from argon).
+      // - Destructuring `const { hash, ...safeUser } = user` would try to
+      //   redeclare `hash` in the same block.
+      //
+      // Error prevented:
+      // - "Block-scoped variable 'hash' used before its declaration"
+      //
+      // Fix:
+      // - Rename `user.hash` to `_hash` during destructuring to avoid
+      //   the name collision while still excluding it from `safeUser`.
+      const { hash: _hash, ...safeUser } = user;
+      return safeUser;
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
