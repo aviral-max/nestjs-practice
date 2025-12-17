@@ -9,6 +9,31 @@ import { PrismaPg } from '@prisma/adapter-pg';
 // Pool = connection pool (manages multiple DB connections efficiently)
 import { Pool } from 'pg';
 
+/**
+ * Prisma Client = the layer our API talks to
+ * ------------------------------------------
+ * - Our NestJS code NEVER talks to Postgres tables directly.
+ * - All queries go through Prisma Client.
+ *
+ * Database level:
+ * - Tables are plural: `users`, `bookmarks`
+ *
+ * Application level (Prisma Client):
+ * - We work with MODELS, not tables
+ * - Models are singular: `User`, `Bookmark`
+ * - Hence the API uses:
+ *     this.prisma.user
+ *     this.prisma.bookmark
+ *
+ * Prisma acts as a translator:
+ *   this.prisma.user.create()
+ *        ↓
+ *   INSERT INTO users (...)
+ *
+ * This keeps DB naming concerns out of business logic
+ * and lets us write type-safe, model-based queries.
+ */
+
 @Injectable()
 export class PrismaService
   extends PrismaClient
