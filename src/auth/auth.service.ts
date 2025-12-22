@@ -4,13 +4,19 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto } from './dto';
 import * as argon from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 // Service = contains all the business logic.
 // This is the place where actual work happens (like saving a user,
 // checking passwords, creating tokens, etc.)
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+    private config: ConfigService,
+  ) {}
   // Function for handling login logic.
   // Later you will add code to validate the user, check password, etc.
   async signin(dto: AuthDto) {
@@ -34,8 +40,13 @@ export class AuthService {
 
     // send back the user
     //excluding the hash
-    const { hash, ...safeUser } = user;
-    return safeUser;
+    // const { hash, ...safeUser } = user;
+    // return safeUser;
+
+    // Instead of returning user details, we generate and return a JWT.
+    // This token represents the authenticated user and will be sent
+    // by the client in future requests for authorization.
+    return this.signToken(user.id, user.email);
   }
 
   // Function for handling signup logic.
@@ -100,8 +111,13 @@ export class AuthService {
       // Fix:
       // - Rename `user.hash` to `_hash` during destructuring to avoid
       //   the name collision while still excluding it from `safeUser`.
-      const { hash: _hash, ...safeUser } = user;
-      return safeUser;
+      // const { hash: _hash, ...safeUser } = user;
+      // return safeUser;
+
+      // After successfully creating the user, we issue a JWT immediately.
+      // This allows the user to be logged in right after signup
+      // without requiring a separate login request.
+      return this.signToken(user.id, user.email);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -112,5 +128,26 @@ export class AuthService {
 
       throw error;
     }
+  }
+
+  async signToken(
+    userId: number,
+    email: string,
+  ): Promise<{ access_token: string }> {
+    const payload = {
+      sub: userId,
+      email,
+    };
+
+    const secret = this.config.get('JWT_SECRET');
+
+    const token = await this.jwt.signAsync(payload, {
+      expiresIn: '15m',
+      secret,
+    });
+
+    return {
+      access_token: token,
+    };
   }
 }
